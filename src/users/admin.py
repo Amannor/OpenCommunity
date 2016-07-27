@@ -59,6 +59,7 @@ class UserChangeForm(forms.ModelForm):
 class UserMembershipInline(admin.TabularInline):
     model = Membership
     fk_name = 'user'
+    extra = 0
 
 
 class MembershipAdmin(admin.ModelAdmin):
