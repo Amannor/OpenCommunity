@@ -3,17 +3,14 @@ from __future__ import unicode_literals
 import time
 import urlparse
 
-import requests
-
-from selenium.webdriver.common.by import By
-from selenium.common.exceptions import NoSuchElementException
 from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core.urlresolvers import reverse
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.webdriver import WebDriver
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import Select
-from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
+from selenium.webdriver.support.ui import WebDriverWait
 
 from communities.models import Community
 from users.models import OCUser
@@ -69,11 +66,11 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
             upcoming_meeting_versions.append(committee.upcoming_meeting_version)
         return upcoming_meeting_versions
 
-    def publish_to_recepients(self, recepients_ids):
+    def publish_to_recipients(self, recipients_ids):
         # Click on publish button.
         self.selenium.find_element_by_xpath('//a[@href="{}main/upcoming/publish/"]'.format(
             self.community.get_absolute_url())).click()
-        for id in recepients_ids:
+        for id in recipients_ids:
             form_select_me = WebDriverWait(self.selenium, 10).until(
                 ec.presence_of_element_located((By.ID, id))
             )
@@ -322,7 +319,7 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
             self.community.get_absolute_url())
         ).click()
 
-        self.publish_to_recepients(mail_recipients_ids)
+        self.publish_to_recipients(mail_recipients_ids)
 
         # Test: If there is a li class = "info", Its OK.
         time.sleep(1)
@@ -334,7 +331,7 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
         mail_recipients_ids.append("id_send_to_1")
         self.test_publish_meeting_to_me_only()
         old_meeting_versions = self.get_committees_upcoming_meeting_versions()
-        self.publish_to_recepients(mail_recipients_ids)
+        self.publish_to_recipients(mail_recipients_ids)
         version_incremented_properly = False
         time.sleep(0.1)
         # Currently checking all versions - we only need one to increment for the test to pass
@@ -346,3 +343,5 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
             if version_incremented_properly:
                 break
         self.assertTrue(version_incremented_properly, "Version didn't increment properly")
+
+
