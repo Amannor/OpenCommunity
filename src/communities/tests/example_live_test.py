@@ -344,4 +344,30 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
                 break
         self.assertTrue(version_incremented_properly, "Version didn't increment properly")
 
+    def test_edit_issue_after_agenda_sent(self):
+        edit_addition_text = "_addendum"
+        mail_recipients_ids = list()
+        mail_recipients_ids.append("id_me")
+        self.test_publish_meeting_to_me_only()
+        issue = self.selenium.find_element_by_xpath('//*[@id="agenda"]/li/a')
+        issue.click()
+        subject = self.selenium.find_element_by_xpath('// *[ @ id = "issue-detail"] / div[1] / div[1] / div / div / div[2] / div[2] / div / div[3] / div / div[1] / \
+                                               div[1] / div[1] / h5 / a[1]')
+        subject.click()
+        title = WebDriverWait(self.selenium, 10).until(
+            ec.presence_of_element_located((By.ID, "id_title"))
+        )
+        old_title_value = title.get_attribute('value')
+        title.send_keys(edit_addition_text)
+        # Save
+        self.selenium.find_element_by_id("issue_edit_submit").click()
 
+        # assert title edit worked properly
+        time.sleep(0.4)
+        new_title = self.selenium.find_element_by_xpath(
+            '//*[@id="issue-detail"]/div[1]/div[1]/div/div/div[2]/div[2]/div/div[3]/div/div[1]/div[1]/h1').text
+        self.assertEqual(new_title, "{}{}".format(old_title_value, edit_addition_text))
+
+        # Go back to meeting and (Re)Publish the agenda
+        self.selenium.find_element_by_xpath('//*[@id="issue-detail"]/div[1]/div[1]/div/div/div[1]/a').click()
+        self.publish_to_recipients(mail_recipients_ids)
