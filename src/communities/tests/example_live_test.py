@@ -371,3 +371,19 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
         # Go back to meeting and (Re)Publish the agenda
         self.selenium.find_element_by_xpath('//*[@id="issue-detail"]/div[1]/div[1]/div/div/div[1]/a').click()
         self.publish_to_recipients(mail_recipients_ids)
+
+    def test_add_proposal_after_agenda_sent(self):
+        mail_recipients_ids = list()
+        mail_recipients_ids.append("id_me")
+        self.test_publish_meeting_to_me_only()
+        # input additional proposal text
+        new_proposal_title = WebDriverWait(self.selenium, 10).until(
+            ec.presence_of_element_located((By.ID, "quick-issue-title"))
+        )
+        new_proposal_title.send_keys("New proposal title")
+        # Press the 'Add' btn
+        self.selenium.find_element_by_id('quick-issue-add').click()
+
+        # (Re)Publish the agenda
+        time.sleep(0.2)
+        self.publish_to_recipients(mail_recipients_ids)
