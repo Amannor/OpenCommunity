@@ -376,14 +376,28 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
         mail_recipients_ids = list()
         mail_recipients_ids.append("id_me")
         self.test_publish_meeting_to_me_only()
+
+        # Navigate to first issue page.
+        self.selenium.find_element_by_xpath('//a[@href="{}main/issues/1/"]'.format(
+            self.community.get_absolute_url())
+        ).click()
+
         # input additional proposal text
         new_proposal_title = WebDriverWait(self.selenium, 10).until(
-            ec.presence_of_element_located((By.ID, "quick-issue-title"))
+            ec.presence_of_element_located((By.ID, "quick-proposal-title"))
         )
-        new_proposal_title.send_keys("New proposal title")
+        new_proposal_title.send_keys(
+            "My brand new proposal")  # TODO - add static counter so as to add different proposal titles
         # Press the 'Add' btn
-        self.selenium.find_element_by_id('quick-issue-add').click()
-
-        # (Re)Publish the agenda
-        time.sleep(0.2)
+        self.selenium.find_element_by_id('quick-proposal-add').click()
+        # Go back to meeting page & (re)publish agenda
+        time.sleep(0.5)
+        self.selenium.find_element_by_xpath('//a[@href="{}main/"]'.format(
+            self.community.get_absolute_url())
+        ).click()
         self.publish_to_recipients(mail_recipients_ids)
+
+    def test_vote_on_proposal(self):
+        pass
+        # self.test_publish_meeting_to_me_only()
+        # raw_input("Enter to continue")
