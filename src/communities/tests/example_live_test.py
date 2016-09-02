@@ -15,7 +15,6 @@ from selenium.webdriver.support.ui import WebDriverWait
 from communities.models import Community
 from users.models import OCUser
 
-
 class ExampleCommunityLiveTests(StaticLiveServerTestCase):
     @classmethod
     def setUpClass(cls):
@@ -399,5 +398,38 @@ class ExampleCommunityLiveTests(StaticLiveServerTestCase):
 
     def test_vote_on_proposal(self):
         pass
-        # self.test_publish_meeting_to_me_only()
-        # raw_input("Enter to continue")
+
+    def generic_proposal_action(self, issue_num=1, accept_proposal=True):
+        self.test_publish_meeting_to_me_only()
+        # Start meeting
+        self.selenium.find_element_by_class_name('btn-default').click()
+        WebDriverWait(self.selenium, 10).until(
+            ec.presence_of_element_located((By.XPATH, '//*[@id="modal-form"]/div/form/div/div[3]/input'))).click()
+
+        # Goto n-th issue -> 1st proposal
+        time.sleep(1)
+        self.selenium.find_element_by_xpath('//a[@href="{}main/issues/{}/"]'.format(
+            self.community.get_absolute_url(), issue_num)
+        ).click()
+        WebDriverWait(self.selenium, 10).until(
+            ec.presence_of_element_located(
+                (By.CLASS_NAME, 'check_box'))).click()  # Will choose 1st proposal (consider making it dynamic)
+
+        # Accept \ reject
+        wanted_btn_num = 1 if accept_proposal else 2
+        btn_generic_xpath = '// *[ @ id = "proposal-form"] / div / button[{}]'
+        self.selenium.find_element_by_xpath(btn_generic_xpath.format(wanted_btn_num)).click()
+
+        """
+        Check if if we accepted \ rejected properly
+        Note - currently only checking that exactly one btn is left present
+        (TODO: If we accepted, check that only the reject btn is present, and vice versa)
+        """
+        self.assertEqual(len(self.selenium.find_elements_by_xpath(btn_generic_xpath.format(1))), 1)
+        self.assertEqual(len(self.selenium.find_elements_by_xpath(btn_generic_xpath.format(2))), 0)
+
+    def test_accept_proposal(self):
+        self.generic_proposal_action()
+
+    def test_reject_proposal(self):
+        self.generic_proposal_action(accept_proposal=False)
